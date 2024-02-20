@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response, Router } from "express";
 import blog from "../controller/post.controller";
 import authChecker from "../middleware/authchecker";
+import authApp from "../app/auth.app";
+import postController from "../controller/post.controller";
 
 const router = Router()
 
@@ -13,6 +15,7 @@ router.put("/edit/:id" , authChecker as (req: Request, res: Response, next: Next
 
 router.post("/create" , authChecker as (req: Request, res: Response, next: NextFunction) => any ,blog.create as (req: Request, res: Response, next: NextFunction) => any)
 
+router.delete("/delete/:id" , authChecker as (req: Request, res: Response, next: NextFunction) => any  , postController.deleteBlog   as (req: Request, res: Response, next: NextFunction) => any)
 
 
 export default router

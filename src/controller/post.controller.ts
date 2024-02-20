@@ -141,8 +141,43 @@ class PostController {
                 }
             })
         } catch (error) {
-             next(error)
+            next(error)
         }
+    }
+    async deleteBlog(req: CustomRequest, res: Response, next: NextFunction) {
+        try {
+            let blogID = req.params.id
+            let userID = req.user.id
+            let blog = await prisma.blog.findFirst({
+                where : {
+                    id : +blogID
+                }
+            })
+            if (!blog) {
+                return res.status(404).json({
+                    success : false,
+                    error : {
+                        message : "there is not any blog"
+                    },
+                    data : null
+                })
+            }
+            await prisma.blog.delete({
+                where : {
+                    id : +blogID
+                }
+            })
+            return res.status(200).json({
+                success : true,
+                error : null,
+                data : {
+                    message : "delete succesfully"
+                }
+            })
+        } catch (error) {
+ 
+        }
+
     }
 }
 

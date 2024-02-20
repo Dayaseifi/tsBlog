@@ -4,6 +4,7 @@ import errorHandler from './exceptions/errorHandler';
 import authrouter from './router/auth.router';
 import cookieparser from 'cookie-parser'
 import Blogrouter from './router/blog.router';
+import { landingPage } from './controller/landing.controller';
 
 
 dotenv.config({
@@ -15,6 +16,8 @@ app.use(cookieparser());
 app.use(express.json());
 app.use(authrouter)
 app.use('/blog', Blogrouter)
+app.use('/', landingPage)
+
 
 app.use(errorHandler.unexceptionError)
 app.use(errorHandler.error404)
