@@ -59,5 +59,85 @@ class PostController {
             next(error);
         }
     }
+    async getBlog(req, res, next) {
+        try {
+            let id = req.params.id;
+            let blog = await prisma.blog.findFirst({
+                where: {
+                    id: +id
+                },
+                include: {
+                    author: {
+                        select: {
+                            username: true
+                        }
+                    }
+                }
+            });
+            return res.status(200).json({
+                success: true,
+                error: null,
+                data: {
+                    blog
+                }
+            });
+        }
+        catch (error) {
+        }
+    }
+    async editBlog(req, res, next) {
+        try {
+            let userID = req.user.id;
+            let blogID = req.params.id;
+            let { title, content } = req.body;
+            let blog = await prisma.blog.findFirst({
+                where: {
+                    id: +blogID
+                }
+            });
+            if (!blog) {
+                return res.status(404).json({
+                    success: false,
+                    data: null,
+                    error: {
+                        message: "blog doesnt find",
+                    }
+                });
+            }
+            if (blog?.authorId != userID) {
+                return res.status(401).json({
+                    success: false,
+                    data: null,
+                    error: {
+                        message: "user does not  have permission for update this blog",
+                    }
+                });
+            }
+            let newBlog = await prisma.blog.update({
+                where: {
+                    id: +blogID
+                },
+                data: {
+                    title: {
+                        set: title
+                    },
+                    content: {
+                        set: content
+                    }
+                }
+            });
+            return res.status(200).json({
+                success: true,
+                error: null,
+                data: {
+                    message: "post updated",
+                    id: newBlog.id
+                }
+            });
+        }
+        catch (error) {
+            next(error);
+        }
+    }
 }
 exports.default = new PostController;

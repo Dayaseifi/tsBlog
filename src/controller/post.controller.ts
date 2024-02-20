@@ -2,12 +2,13 @@ import { PrismaClient } from "@prisma/client";
 import { error } from "console";
 import { NextFunction, Request, Response } from "express";
 import CustomRequest from "../types/customeRequests";
+import { title } from "process";
 let prisma = new PrismaClient()
 
 type createPostBody = { title: string, content: string }
 
 class PostController {
-    async create(req: CustomRequest, res: Response, next: NextFunction){
+    async create(req: CustomRequest, res: Response, next: NextFunction) {
         try {
             let { title, content }: createPostBody = req.body
             if (typeof title !== 'string' || typeof content !== 'string' || title.trim() === '' || content.trim() === '') {
@@ -41,26 +42,107 @@ class PostController {
         }
     }
     async getBlogs(req: Request, res: Response, next: NextFunction) {
-            try {
-                let blogs = await prisma.blog.findMany({
-                    include: {
-                        author: {
-                            select: {
-                                username: true
-                            }
+        try {
+            let blogs = await prisma.blog.findMany({
+                include: {
+                    author: {
+                        select: {
+                            username: true
                         }
                     }
-                });
-                return res.status(200).json({
-                    error : null,
-                    success :true,
-                    data : {
-                        blogs
+                }
+            });
+            return res.status(200).json({
+                error: null,
+                success: true,
+                data: {
+                    blogs
+                }
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+    async getBlog(req: Request, res: Response, next: NextFunction) {
+        try {
+            let id = req.params.id
+            let blog = await prisma.blog.findFirst({
+                where: {
+                    id: +id
+                },
+                include: {
+                    author: {
+                        select: {
+                            username: true
+                        }
+                    }
+                }
+            })
+            return res.status(200).json({
+                success: true,
+                error: null,
+                data: {
+                    blog
+                }
+            })
+        } catch (error) {
+
+        }
+    }
+    async editBlog(req: CustomRequest, res: Response, next: NextFunction) {
+        try {
+            let userID = req.user.id
+            let blogID = req.params.id
+            let { title, content }: createPostBody = req.body
+            let blog = await prisma.blog.findFirst({
+                where: {
+                    id: +blogID
+                }
+            })
+            if (!blog) {
+                return res.status(404).json({
+                    success: false,
+                    data: null,
+                    error: {
+                        message: "blog doesnt find",
+
                     }
                 })
-            } catch (error) {
-                next(error)
             }
+            if (blog?.authorId != userID) {
+                return res.status(401).json({
+                    success: false,
+                    data: null,
+                    error: {
+                        message: "user does not  have permission for update this blog",
+                    }
+                })
+            }
+            let newBlog = await prisma.blog.update({
+                where: {
+                    id: +blogID
+                },
+                data: {
+                    title: {
+                        set: title
+                    },
+                    content: {
+                        set: content
+                    }
+                }
+
+            })
+            return res.status(200).json({
+                success: true,
+                error: null,
+                data: {
+                    message: "post updated",
+                    id: newBlog.id
+                }
+            })
+        } catch (error) {
+             next(error)
+        }
     }
 }
 
