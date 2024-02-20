@@ -3,20 +3,22 @@ import express from 'express';
 import errorHandler from './exceptions/errorHandler';
 import authrouter from './router/auth.router';
 import cookieparser from 'cookie-parser'
+import Blogrouter from './router/blog.router';
 
 
 dotenv.config({
-    path : '../.env'
+    path: '../.env'
 });
 
-const app  = express();
+const app = express();
 app.use(cookieparser());
 app.use(express.json());
 app.use(authrouter)
+app.use('/blog', Blogrouter)
 
 app.use(errorHandler.unexceptionError)
 app.use(errorHandler.error404)
 
-app.listen(process.env.PORT , ()=> {
+app.listen(process.env.PORT, () => {
     console.log(`project run on port ${process.env.PORT}`);
 })

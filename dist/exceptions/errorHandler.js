@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomError = void 0;
 class CustomError extends Error {
+    status;
     constructor(message, status = 500) {
         super(message);
         this.status = status;
