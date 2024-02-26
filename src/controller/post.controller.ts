@@ -1,11 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { error } from "console";
 import { NextFunction, Request, Response } from "express";
 import CustomRequest from "../types/customeRequests";
-import { title } from "process";
+import { createPostBody } from "../types/blogs/post.types";
 let prisma = new PrismaClient()
 
-type createPostBody = { title: string, content: string }
 
 class PostController {
     async create(req: CustomRequest, res: Response, next: NextFunction) {
@@ -43,6 +41,7 @@ class PostController {
     }
     async getBlogs(req: Request, res: Response, next: NextFunction) {
         try {
+
             let blogs = await prisma.blog.findMany({
                 include: {
                     author: {
@@ -149,33 +148,33 @@ class PostController {
             let blogID = req.params.id
             let userID = req.user.id
             let blog = await prisma.blog.findFirst({
-                where : {
-                    id : +blogID
+                where: {
+                    id: +blogID
                 }
             })
             if (!blog) {
                 return res.status(404).json({
-                    success : false,
-                    error : {
-                        message : "there is not any blog"
+                    success: false,
+                    error: {
+                        message: "there is not any blog"
                     },
-                    data : null
+                    data: null
                 })
             }
             await prisma.blog.delete({
-                where : {
-                    id : +blogID
+                where: {
+                    id: +blogID
                 }
             })
             return res.status(200).json({
-                success : true,
-                error : null,
-                data : {
-                    message : "delete succesfully"
+                success: true,
+                error: null,
+                data: {
+                    message: "delete succesfully"
                 }
             })
         } catch (error) {
- 
+
         }
 
     }
